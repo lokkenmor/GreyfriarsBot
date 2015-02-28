@@ -9,9 +9,13 @@
 #          cluttering up the main part of the /r/Edinburgh board.
 
 import argparse;
+import configparser;
 import sys;
 
 from CLIParsedOutput import CLIParsedOutput
+
+# Global variables
+config = None;
 
 
 def parse_cli(argv):
@@ -27,7 +31,7 @@ def parse_cli(argv):
 
     parsed_output = CLIParsedOutput();
 
-    cli_p.add_argument('--config', 
+    cli_p.add_argument('--configfile', 
             type=argparse.FileType('r'),
             help='Configuration file to load',
             required=True,
@@ -38,9 +42,26 @@ def parse_cli(argv):
     return parsed_output;
 
 
+def parse_config(config_f):
+    # The config_f is the file handler which already open for read operations.
+    # Which is why we use read_file, not plain old read.
+    conf = configparser.ConfigParser();
+    conf.read_file(config_f);
+
+    parse_config_general(conf);
+    return conf;
+
+
 def main():
+    # Parse the CLI to somethign sane.
     # Need to drop the first argument, which is the script name, from the list
     # of CLI args to process
-    parsed_output = parse_cli(sys.argv[1:]);
+    parsed_cli = parse_cli(sys.argv[1:]);
+
+    # Parse the config file given by the CLI inputs.
+    global config;
+    config = parse_config(parsed_cli.configfile);
+
+
 
 main();

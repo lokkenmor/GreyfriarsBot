@@ -2,6 +2,6 @@
 
 class CLIParsedOutput():
     """The parsed output from the CLI"""
-    config = '';
+    configfile = '';
     def __init__(self):
         return;
