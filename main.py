@@ -11,8 +11,10 @@
 import argparse;
 import sys;
 
+from CLIParsedOutput import CLIParsedOutput
 
-def parse_cli(args):
+
+def parse_cli(argv):
     cli_p = argparse.ArgumentParser(description="""
     GreyfriarsBot.
     A bot to periodically poll /r/edinburgh and determine whether any new threads
@@ -23,15 +25,22 @@ def parse_cli(args):
     The bot will also operate a publish-subscribe mechanism to notify anyone who is
     register for aleart a direct notifiaction of when meetups are planned.""");
 
-    cli_p.add_argument('--config-file', 
+    parsed_output = CLIParsedOutput();
+
+    cli_p.add_argument('--config', 
             type=argparse.FileType('r'),
             help='Configuration file to load',
-            required=True);
+            required=True,
+            metavar='file');
 
-    cli_p.parse_args(args);
+    cli_p.parse_args(argv, namespace=parsed_output);
+
+    return parsed_output;
 
 
 def main():
-    parse_cli(sys.argv[1:]);
+    # Need to drop the first argument, which is the script name, from the list
+    # of CLI args to process
+    parsed_output = parse_cli(sys.argv[1:]);
 
 main();
