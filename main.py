@@ -48,7 +48,21 @@ def parse_config(config_f):
     conf = configparser.ConfigParser();
     conf.read_file(config_f);
 
-    parse_config_general(conf);
+    # Check that we have the minimum configuration required to execute this bot
+    # Minimums are:
+    #   We know when we were last run
+    #   The bot's username
+    #   The bot's password
+    #   The subreddit the bot is scraping
+    #
+    # We're not so concerned about what Classes the bot is using to search the
+    # scraped space for because we could execute to completion happily without
+    # them.
+    assert(conf['general']['last_run'] is not None);
+    assert(conf['praw']['username'] is not None);
+    assert(conf['praw']['password'] is not None);
+    assert(conf['praw']['subreddit'] is not None);
+
     return conf;
 
 
