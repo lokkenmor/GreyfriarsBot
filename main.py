@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 # Author:  lokkenmor <lokkenmor@live.co.uk>
 # Name:    GreyfriarsBot
 # Purpose: A bot to periodically poll the /r/Edinburgh subreddit to scan for
@@ -9,14 +11,27 @@
 import argparse;
 import sys;
 
-cli_p = argparse.ArgumentParser(description="""
-GreyfriarsBot.
-A bot to periodically poll /r/edinburgh and determine whether any new threads
-posted since the last execution are trying to organise, or illict, a mettup
-within the community.
-If so, the bot will notify the poster about /r/edinburgh_meetups and may cross
-post the thread there.
-The bot will also operate a publish-subscribe mechanism to notify anyone who is
-register for aleart a direct notifiaction of when meetups are planned.""");
 
-cli_p.parse_args(sys.argv);
+def parse_cli(args):
+    cli_p = argparse.ArgumentParser(description="""
+    GreyfriarsBot.
+    A bot to periodically poll /r/edinburgh and determine whether any new threads
+    posted since the last execution are trying to organise, or illict, a mettup
+    within the community.
+    If so, the bot will notify the poster about /r/edinburgh_meetups and may cross
+    post the thread there.
+    The bot will also operate a publish-subscribe mechanism to notify anyone who is
+    register for aleart a direct notifiaction of when meetups are planned.""");
+
+    cli_p.add_argument('--config-file', 
+            type=argparse.FileType('r'),
+            help='Configuration file to load',
+            required=True);
+
+    cli_p.parse_args(args);
+
+
+def main():
+    parse_cli(sys.argv[1:]);
+
+main();
