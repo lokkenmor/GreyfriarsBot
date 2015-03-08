@@ -16,10 +16,12 @@ from CLIParsedOutput import CLIParsedOutput
 
 # Global variables
 config = None;
+praw_user = None;
 
 
 def parse_cli(argv):
-    cli_p = argparse.ArgumentParser(description="""
+    cli_p = argparse.ArgumentParser(description=
+    """
     GreyfriarsBot.
     A bot to periodically poll /r/edinburgh and determine whether any new threads
     posted since the last execution are trying to organise, or illict, a mettup
@@ -27,11 +29,12 @@ def parse_cli(argv):
     If so, the bot will notify the poster about /r/edinburgh_meetups and may cross
     post the thread there.
     The bot will also operate a publish-subscribe mechanism to notify anyone who is
-    register for aleart a direct notifiaction of when meetups are planned.""");
+    register for aleart a direct notifiaction of when meetups are planned.
+    """);
 
     parsed_output = CLIParsedOutput();
 
-    cli_p.add_argument('--configfile', 
+    cli_p.add_argument('--configfile',
             type=argparse.FileType('r'),
             help='Configuration file to load',
             required=True,
@@ -66,16 +69,44 @@ def parse_config(config_f):
     return conf;
 
 
+def connect_to_subreddit(config):
+    global praw_user;
+    praw_h = praw.Reddit(user_agent = "/u/Greyfriars bot for watching
+                                       /r/Edinburgh for meetup threads");
+    praw_h.login(config['praw']['username'], config['praw']['password']);
+    assert(praw_h is not None);
+    praw_user = praw_h.user;
+    subreddit = praw_h.get_subreddit(config['praw']['subreddit']);
+    return subreddit;
+
+
+def execute_on_subreddit(subreddit):
+    global config;
+
+    if config[config['praw']['subreddit']]['agent'] is None:
+        return;
+
+    controller = config[config['praw']['subreddit']]['agent'](subreddit,
+            config);
+
+
+
+
 def main():
+    global config;
     # Parse the CLI to somethign sane.
     # Need to drop the first argument, which is the script name, from the list
     # of CLI args to process
     parsed_cli = parse_cli(sys.argv[1:]);
 
     # Parse the config file given by the CLI inputs.
-    global config;
     config = parse_config(parsed_cli.configfile);
 
+    # Establish connection to reddit via praw, using the settings from the
+    # config file
+    subreddit = connect_to_subreddit(config);
+
+    execute_on_subreddit(subreddit);
 
 
 main();
