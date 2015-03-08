@@ -71,12 +71,20 @@ def parse_config(config_f):
 
 def connect_to_subreddit(config):
     global praw_user;
-    praw_h = praw.Reddit(user_agent = "/u/Greyfriars bot for watching
-                                       /r/Edinburgh for meetup threads");
+
+    # Connect and login to Reddit using the given config
+    # TODO: Login failure handling
+    praw_h = praw.Reddit(user_agent = config['praw']['agent_user']);
     praw_h.login(config['praw']['username'], config['praw']['password']);
+
+    # Assert that we have a working connection and that it didn't break
     assert(praw_h is not None);
+
+    # Export the uname to the global space so it can be picked up later
+    # Connect to the subreddit given by the configuration info.
     praw_user = praw_h.user;
     subreddit = praw_h.get_subreddit(config['praw']['subreddit']);
+
     return subreddit;
 
 
