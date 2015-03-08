@@ -91,9 +91,13 @@ def connect_to_subreddit(config):
 def execute_on_subreddit(subreddit):
     global config;
 
+    # If there's no agent configuration in the config file then break and
+    # return
     if config[config['praw']['subreddit']]['agent'] is None:
         return;
 
+    # Otherwise, execute the specified Agnet (singular - no support for
+    # multiple agents).
     controller = config[config['praw']['subreddit']]['agent'](subreddit,
             config);
 
