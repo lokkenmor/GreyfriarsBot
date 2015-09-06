@@ -69,39 +69,48 @@ def parse_config(config_f):
     return conf;
 
 
-def connect_to_subreddit(config):
-    global praw_user;
+def connect_to_reddit(config):
+    """
+    Establish a connection to reddit.
+    """
+    reddit = praw.Reddit(user_agent = config['praw']['agent_user']);
+    assert(reddit is not None);
+    return reddit;
 
-    # Connect and login to Reddit using the given config
-    # TODO: Login failure handling
-    praw_h = praw.Reddit(user_agent = config['praw']['agent_user']);
-    praw_h.login(config['praw']['username'], config['praw']['password']);
 
-    # Assert that we have a working connection and that it didn't break
-    assert(praw_h is not None);
+def login_to_reddit(reddit):
+    """
+    Login to reddit.
+    """
+    reddit.login(config['praw']['username'], config['praw']['password']);
+    user = reddit.user;
+    assert(user is not None);
+    return user;
 
-    # Export the uname to the global space so it can be picked up later
-    # Connect to the subreddit given by the configuration info.
-    praw_user = praw_h.user;
-    subreddit = praw_h.get_subreddit(config['praw']['subreddit']);
 
+def connect_to_subreddit(reddit):
+    """
+    Connect to the subreddit as specififed by the config.
+    """
+    subreddit = reddit.get_subreddit(config['praw']['subreddit']);
+    assert(subreddit is not None);
     return subreddit;
 
 
-def execute_on_subreddit(subreddit):
-    global config;
-
+def execute_agents(config, username, reddit, subreddit):
+    """
+    Run the agent controller as, specified by the config file, to execute
+    the agents for this bot.
+    """
     # If there's no agent configuration in the config file then break and
     # return
-    if config[config['praw']['subreddit']]['agent'] is None:
+    if config[subreddit.title['agent'] is None:
         return;
 
     # Otherwise, execute the specified Agnet (singular - no support for
     # multiple agents).
-    controller = config[config['praw']['subreddit']]['agent'](subreddit,
-            config);
-
-
+    config[config['praw']['subreddit']]['agent'](config, username, reddit,
+        subreddit);
 
 
 def main():
@@ -114,11 +123,17 @@ def main():
     # Parse the config file given by the CLI inputs.
     config = parse_config(parsed_cli.configfile);
 
+    # Connect to reddit
+    reddit = connect_to_reddit(config);
+
+    # Login to reddit
+    username = login_to_reddit(reddit);
+
     # Establish connection to reddit via praw, using the settings from the
     # config file
-    subreddit = connect_to_subreddit(config);
+    subreddit = connect_to_subreddit(reddit);
 
-    execute_on_subreddit(subreddit);
+    execute_agents(config, username, reddit, subreddit);
 
 
 main();

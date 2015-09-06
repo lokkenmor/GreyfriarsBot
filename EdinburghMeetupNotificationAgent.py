@@ -1,10 +1,12 @@
 #!/usr/bin/python3
 
 class EdinburghMeetupNotificationAgent():
-    """Edinburgh Meetup Notification Agent. This class should be called when a
+    """
+    Edinburgh Meetup Notification Agent. This class should be called when a
     thread has definitely been determined to be setting up a meetup. This class
     will notify anyone in the subscribers list that a meetup thread has been
-    posted and it will provide a link to that thread."""
+    posted and it will provide a link to that thread.
+    """
 
     SUBSCRIBERS_FILE = 'edinburgh/meetup.sub';
     SUBJECT = "New meetup thread in /r/edinburgh"
@@ -31,6 +33,6 @@ class EdinburghMeetupNotificationAgent():
         subscribers = open(SUBSCRIBERS_FILE, 'r');
         for subscriber in subscribers:
             praw_user.send_message(
-                    subscriber,
+                    subscriber.rstrip(),
                     self.SUBJECT,
                     self.MESSAGE.format(link=thread.url);

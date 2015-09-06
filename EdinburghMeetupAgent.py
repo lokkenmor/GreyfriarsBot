@@ -17,23 +17,30 @@ class EdinburghMeetupAgent():
         return;
 
     def process_threads(self):
-        for thread in self.threads:
+        # Need to take a copy of self.threads because iterating over lists
+        # apparently alters the list. (They're treated more as a queue...)
+        threads = self.threads;
+
+        for thread in threads:
             for regexp in regexps:
-                res = re.search(regexp, thread.title);
+                res = re.search(regexp, thread.title, re.IGNORECASE);
                 if res == None or res == '':
                     continue;
+
                 # There's clearly something here, now we just need to knwo what
+                res = res.lower();
                 actions = {
-                        r"\[MEETUP\]"   : definite_meetup,
+                        r"\[meetup\]"   : definite_meetup,
                         r"meetup"       : possible_meetup,
                         r"meet-up"      : possible_meetup,
                         r"meet up"      : possible_meetup,
                         }
                 self.actions[regexp](thread);
+
         return;
 
     def definite_meetup(thread):
         # This is definitely a meetup thread. Someone is setting up a meetup,
         # or trying to, so what we'll do now is notify anyone who is subcribed
         # to the bot to come and check out the thread.
-        EdinburghMeetupNotificationAgent();
+        EdinburghMeetupNotificationAgent(thread);
